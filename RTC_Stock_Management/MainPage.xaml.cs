@@ -6,5 +6,10 @@
         {
             InitializeComponent();
         }
+        protected override void OnHandlerChanged()
+        {
+            base.OnHandlerChanged();
+            blazorWebView.Focus();
+        }
     }
 }

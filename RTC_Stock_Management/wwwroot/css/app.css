@@ -1,29 +1,9 @@
-﻿/*#if (SampleContent)*/
-html, body {
+﻿html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-a, .btn-link {
-    color: #006bb7;
-}
-
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-.content {
-    padding-top: 1.1rem;
-}
-
-/*#endif*/
-h1:focus {
-    outline: none;
+    font-size: 18px;
+    -webkit-user-drag: none;
+    user-select: none;
+    height: 100%
 }
 
 .valid.modified:not([type=checkbox]) {
@@ -87,10 +67,23 @@ h1:focus {
     }
 }
 
-/* Custom css */
+#app {
+    /*    background: linear-gradient(90deg, #4facfe, #00f2fe);*/
+    height: 100%;
+}
 
+.input-group-text {
+    user-select: none;
+    cursor: pointer;
+}
+
+a.nav-link {
+    text-decoration: none;
+    color: #3172e6
+}
+/* Custom css */
 .scrollable-table {
-    max-height: 550px;
+    max-height: 560px;
     overflow: auto;
 }
 
@@ -98,5 +91,9 @@ h1:focus {
         position: sticky;
         top: 0;
         z-index: 2;
-        background: #f8f9fa; /* match .table-light bg */
+        background: #f8f9fa;
     }
+
+tbody td {
+    user-select: text;
+}

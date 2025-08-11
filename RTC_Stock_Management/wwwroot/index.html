@@ -6,27 +6,24 @@
     <title>RTC Stock Management</title>
     <base href="/" />
     <link href="/libs/bootstrap-5.3.6/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/libs/loading-overlay/waitMe.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="RTC_Stock_Management.styles.css" />
     <link rel="icon" href="data:,">
+    <script src="libs/bootstrap-5.3.6/js/bootstrap.bundle.min.js"></script>
+    <script src="libs/jQuery/jquery-3.7.1.min.js"></script>
+    <script src="libs/loading-overlay/waitMe.min.js"></script>
+    <script src="js/site.js"></script>
+    <script src="_framework/blazor.webview.js" autostart="false"></script>
 </head>
 
 <body>
-
     <div class="status-bar-safe-area"></div>
-
-    <div id="app">Loading...</div>
-
+    <div id="app"></div>
     <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-
-    <script src="libs/bootstrap-5.3.6/js/bootstrap.bundle.min.js"></script>
-    <script src="libs/jQuery/jquery-3.7.1.min.js"></script>
-    <script src="_framework/blazor.webview.js" autostart="false"></script>
-
 </body>
-
 </html>
