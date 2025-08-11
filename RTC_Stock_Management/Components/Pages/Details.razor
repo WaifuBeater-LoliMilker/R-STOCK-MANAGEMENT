@@ -1,0 +1,12 @@
+﻿@page "/details/{id:int}" 
+<h3>Details</h3>
+
+@code {
+    [Parameter] public int? id { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        // called after parameters (like id) are set or changed
+        // use id here (load data, etc.)
+    }
+}

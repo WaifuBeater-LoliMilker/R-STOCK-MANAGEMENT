@@ -1,0 +1,71 @@
+﻿@page "/"
+@using System.Linq
+
+<div class="d-flex flex-column align-items-center justify-content-center gap-3 px-3 h-100">
+    <h1 class="text-center" tabindex="-1">Nhập kho</h1>
+    <div class="w-75">
+        <input class="form-control" placeholder="Nhập mã..." @bind="searchTerm" aria-label="Filter rows by name" autofocus/>
+    </div>
+    <div class="w-100 flex-grow-1">
+        <div class="scrollable-table border rounded">
+            <table class="table table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:80px">Id</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!FilteredItems.Any())
+                    {
+                        <tr><td colspan="3" class="text-center py-4">No matching rows</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in FilteredItems)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.Name</td>
+                                <td>@item.Description</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string searchTerm = "";
+
+    class Row
+    {
+        public int Id { get; init; }
+        public string Name { get; init; } = "";
+        public string Description { get; init; } = "";
+    }
+
+    private List<Row> rows = new();
+
+    private IEnumerable<Row> FilteredItems =>
+        string.IsNullOrWhiteSpace(searchTerm)
+            ? rows
+            : rows.Where(r => r.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                           || r.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        for (int i = 1; i <= 30; i++)
+        {
+            rows.Add(new Row
+            {
+                Id = i,
+                Name = $"Item {i}",
+                Description = $"This is a description for item {i}."
+            });
+        }
+    }
+}
