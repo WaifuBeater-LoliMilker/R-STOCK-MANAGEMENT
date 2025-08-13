@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Components.WebView.Maui;
+using RTC_Stock_Management.Services;
 
 namespace RTC_Stock_Management
 {
@@ -17,7 +17,10 @@ namespace RTC_Stock_Management
                 });
 
             builder.Services.AddMauiBlazorWebView();
-
+            DependencyService.Register<AlertService>();
+            DependencyService.Register<ApiSettings>();
+            DependencyService.Register<ApiService>();
+            DependencyService.Register<ImportWarehouseService>();
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();

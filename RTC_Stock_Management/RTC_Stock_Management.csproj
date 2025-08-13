@@ -47,6 +47,7 @@
       <AndroidPackageFormat>apk</AndroidPackageFormat>
       <AndroidLinkTool>r8</AndroidLinkTool>
       <TrimMode>link</TrimMode>
+	  <ScopedCssEnabled>true</ScopedCssEnabled>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
@@ -75,6 +76,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AndroidResource Remove="Platforms\Android\Resources\xml\network_security_config.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
       <None Remove="Resources\AppIcon\warehouse.png" />
     </ItemGroup>
 
@@ -87,6 +92,11 @@
         <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.90" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.90" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Using Include="Microsoft.AspNetCore.Components.WebView.Maui" />
     </ItemGroup>
 
 </Project>

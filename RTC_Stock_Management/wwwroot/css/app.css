@@ -81,6 +81,10 @@ a.nav-link {
     text-decoration: none;
     color: #3172e6
 }
+
+    a.nav-link:hover {
+        color: #2253aa
+    }
 /* Custom css */
 .scrollable-table {
     max-height: 560px;
@@ -96,4 +100,13 @@ a.nav-link {
 
 tbody td {
     user-select: text;
+}
+.table {
+    table-layout: fixed;
+    width: 100%;
+}
+.overflow-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
