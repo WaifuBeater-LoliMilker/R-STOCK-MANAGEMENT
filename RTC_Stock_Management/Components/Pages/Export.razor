@@ -1,0 +1,140 @@
+﻿@page "/export"
+@using System.Linq
+@using Microsoft.AspNetCore.Components.Forms
+@using RTC_Stock_Management.Services
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<div class="d-flex flex-column align-items-center justify-content-center gap-3 h-100 px-3 pt-3">
+    <button class="btn btn-back" style="font-weight:bolder;font-size:22px;" @onclick="GoBack">←</button>
+    <h1 class="text-center" tabindex="-1">Xuất kho</h1>
+    <div class="input-group w-100">
+        <input id="code" class="form-control" @ref="codeInput"
+               placeholder="Nhập mã..." @bind="warehouseCode" @bind:event="oninput" @onkeyup="OnKeyUp"
+               aria-label="Filter rows by name" />
+        <label for="code" class="input-group-text focus-ring focus-ring-primary" @onclick="LoadData">➤</label>
+    </div>
+    <div class="w-100 flex-grow-1 d-flex" style="min-height:0px;">
+        <div class="scrollable-table border rounded flex-fill">
+            <table class="table table-hover table-striped table-bordered border-primary mb-0">
+                <colgroup>
+                    <col style="width:50px" />
+                    <col style="width:65%" />
+                    <col style="width:80px" />
+                    <col style="width:80px" />
+                    <col style="width:35%" />
+                </colgroup>
+                <thead class="table-light text-center align-middle">
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã vật tư</th>
+                        <th>SL cần xuất</th>
+                        <th>SL thực tế</th>
+                        <th>Loại hàng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!rows.Any())
+                    {
+                        <tr><td colspan="5" class="text-center py-4">Không có dữ liệu</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in rows)
+                        {
+                            <tr class="@(item.Status == 1 ? "table-primary" : "") align-middle">
+                                <td class="text-center">@item.STT</td>
+                                <td>
+                                    <NavLink href="@($"export-details?warehouse-code={warehouseCode}&material-code={item.MaterialCode}&material-type={item.MaterialType}&planquantity={item.Quantity}&actualquantity={item.QuantityReal}")"
+                                             class="nav-link overflow-ellipsis" draggable="false">
+                                        @item.MaterialCode
+                                    </NavLink>
+                                </td>
+                                <td class="overflow-ellipsis">@item.Quantity</td>
+                                <td class="overflow-ellipsis">@item.QuantityReal</td>
+                                <td class="overflow-ellipsis">@(item.MaterialType == 1 ? "Lớn" : "Bé")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="height:8px"></div>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "warehouse-code")]
+    public string? warehouseCode { get; set; }
+    private ElementReference codeInput;
+
+    class Row
+    {
+        public int STT { get; set; }
+        public int Status { get; set; }
+        public decimal Quantity { get; set; } = 0;
+        public decimal QuantityReal { get; set; } = 0;
+        public string MaterialCode { get; set; } = "";
+        public int MaterialType { get; set; } = 1;
+    }
+
+    private List<Row> rows = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("setFocus", codeInput);
+        }
+    }
+    private async Task OnKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" || e.Key == "Enter" || e.Code == "NumpadEnter")
+        {
+            await LoadData();
+            await JS.InvokeVoidAsync("selectAllText", codeInput);
+        }
+    }
+    private async Task LoadData()
+    {
+        try
+        {
+            if (warehouseCode == null) return;
+            var service = DependencyService.Get<ExportWarehouseService>();
+            await JS.InvokeVoidAsync("toggleLoading", true);
+            var data = await service.GetMaterialCode(warehouseCode);
+            if (data == null) return;
+            rows.Clear();
+            for (int i = 1; i <= data.Count; i++)
+            {
+                rows.Add(new Row
+                {
+                    STT = i,
+                    Status = data[i - 1].Status ?? 0,
+                    Quantity = data[i - 1].Quantity ?? 0,
+                    QuantityReal = data[i - 1].QuantityReal ?? 0,
+                    MaterialCode = data[i - 1].MaterialCode,
+                    MaterialType = data[i - 1].MaterialType ?? 0,
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+        finally
+        {
+            await JS.InvokeVoidAsync("toggleLoading", false);
+        }
+    }
+    private void GoBack()
+    {
+        Nav.NavigateTo($"/");
+    }
+}

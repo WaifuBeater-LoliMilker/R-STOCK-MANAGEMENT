@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using RTC_Stock_Management.Services;
+using System.Globalization;
 
 namespace RTC_Stock_Management
 {
@@ -21,6 +22,11 @@ namespace RTC_Stock_Management
             DependencyService.Register<ApiSettings>();
             DependencyService.Register<ApiService>();
             DependencyService.Register<ImportWarehouseService>();
+            DependencyService.Register<ExportWarehouseService>();
+
+            var culture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();

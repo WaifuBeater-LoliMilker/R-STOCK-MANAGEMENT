@@ -1,0 +1,191 @@
+﻿@page "/export-details"
+@using System.Linq
+@using Microsoft.AspNetCore.Components.Forms
+@using RTC_Stock_Management.Services
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+
+<div class="d-flex flex-column align-items-center justify-content-center gap-3 h-100 px-3 pt-3">
+    <button class="btn btn-back" style="font-weight:bolder;font-size:22px;" @onclick="GoBack">←</button>
+    <h1 class="text-center" tabindex="-1">@materialcode</h1>
+    <div class="w-100 row">
+        <div class="col-6">
+            <label for="planquantity" class="form-label">SL cần xuất</label>
+            <input id="planquantity" class="form-control" type="number" readonly
+                   @ref="planQuantityInput" @bind="planQuantity" @bind:event="oninput" />
+        </div>
+        <div class="col-6">
+            <label for="actualquantity" class="form-label">SL thực tế</label>
+            <input id="actualquantity" class="form-control" type="number" readonly="@(materialtype == 1)"
+                   @ref="actualQuantityInput" @bind="actualQuantity" @bind:event="oninput" @onkeyup="OnQuantityKeyUp" />
+        </div>
+    </div>
+    @if (materialtype == 1)
+    {
+        <div class="w-100" style="padding-left:0.75rem;padding-right:0.75em;">
+            <label for="serial" class="form-label">Nhập mã Serial</label>
+            <input id="serial" class="form-control w-100" placeholder="Nhập mã Serial"
+                   @ref="serialInput" @bind="serialNumber" @bind:event="oninput" @onkeyup="OnSerialKeyUp" />
+        </div>
+    }
+    <div class="w-100 flex-grow-1 d-flex" style="min-height:0px;">
+        <div class="scrollable-table border rounded flex-fill">
+            <table class="table table-hover table-striped table-bordered border-primary mb-0">
+                <thead class="table-light text-center align-middle">
+                    <tr>
+                        <th style="width:50px">STT</th>
+                        <th>Packing code</th>
+                        <th>Serial</th>
+                        <th style="width:100px">Vị trí</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!rows.Any())
+                    {
+                        <tr><td colspan="4" class="text-center py-4">Không có dữ liệu</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in rows)
+                        {
+                            <tr class="align-middle">
+                                <td class="text-center">@row.STT</td>
+                                <td class="overflow-breakword">@row.PackingCode</td>
+                                <td class="overflow-breakword">@row.Serial</td>
+                                <td class="overflow-ellipsis">@row.Location</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="height:8px"></div>
+</div>
+<script src="js/home.js"></script>
+@code {
+    //private IDisposable? locationChangedHandler;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "warehouse-code")]
+    public string? warehousecode { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "material-code")]
+    public string? materialcode { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "material-type")]
+    public int materialtype { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "planquantity")]
+    public decimal planQuantity { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "actualquantity")]
+    public decimal actualQuantity { get; set; }
+
+    private string serialNumber { get; set; } = "";
+
+    private ElementReference planQuantityInput;
+    private ElementReference actualQuantityInput;
+    private ElementReference serialInput;
+    protected override void OnParametersSet() { }
+
+    class Row
+    {
+        public int STT { get; set; }
+        public string PackingCode { get; set; } = "";
+        public string Serial { get; set; } = "";
+        public string Location { get; set; } = "";
+    }
+
+    private List<Row> rows = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        //locationChangedHandler = Nav.RegisterLocationChangingHandler(OnLocationChanging);
+        await LoadData();
+    }
+    public void Dispose()
+    {
+        //locationChangedHandler?.Dispose();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                if (materialtype == 1) await JS.InvokeVoidAsync("setFocus", serialInput);
+                else await JS.InvokeVoidAsync("setFocus", actualQuantityInput);
+            }
+            catch (Exception ex)
+            { }
+        }
+    }
+    private void GoBack()
+    {
+        Nav.NavigateTo($"/export?warehouse-code={warehousecode}");
+    }
+
+    private async Task OnQuantityKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            var service = DependencyService.Get<ExportWarehouseService>();
+            var alert = DependencyService.Get<AlertService>();
+            var result = await service.UpdateSmallType(materialcode ?? "", actualQuantity);
+            if (!result) await alert.ShowAsync("Thông báo", "Cập nhật thất bại", "OK");
+            else await alert.ShowAsync("Thông báo", "Cập nhật thành công", "OK");
+        }
+    }
+    private async Task OnSerialKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            var service = DependencyService.Get<ExportWarehouseService>();
+            var alert = DependencyService.Get<AlertService>();
+            if(!rows.Any(r => r.Serial == serialNumber))
+            {
+                await alert.ShowAsync("Thông báo", "Serial không nằm trong danh sách", "OK");
+                return;
+            }
+            var result = await service.UpdateLargeType(materialcode ?? "", serialNumber);
+            if (result == 0) await alert.ShowAsync("Thông báo", "Cập nhật không thành công", "OK");
+            else actualQuantity = result;
+        }
+    }
+    private async Task LoadData()
+    {
+        try
+        {
+            if (materialcode == null) return;
+            var service = DependencyService.Get<ExportWarehouseService>();
+            await JS.InvokeVoidAsync("toggleLoading", true);
+            var data = await service.GetSerials(materialcode);
+            if (data == null) return;
+            rows.Clear();
+            for (int i = 1; i <= data.Count; i++)
+            {
+                rows.Add(new Row
+                {
+                    STT = i,
+                    PackingCode = data[i - 1].PackingCode,
+                    Serial = data[i - 1].SerialNumber,
+                    Location = data[i - 1].Location,
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+        finally
+        {
+            await JS.InvokeVoidAsync("toggleLoading", false);
+        }
+    }
+}

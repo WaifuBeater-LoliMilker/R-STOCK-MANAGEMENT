@@ -1,113 +1,12 @@
 ﻿@page "/"
-@using System.Linq
-@using RTC_Stock_Management.Services
-@inject IJSRuntime JS
-
-<div class="d-flex flex-column align-items-center justify-content-center gap-3 h-100 px-3 pt-3">
-    <h1 class="text-center" tabindex="-1">Nhập kho</h1>
-    <div class="input-group w-100">
-        <input id="code" class="form-control" @ref="codeInput"
-               placeholder="Nhập mã..." @bind="warehouseCode" @bind:event="oninput" @onkeyup="OnKeyUp"
-               aria-label="Filter rows by name" />
-        <label for="code" class="input-group-text focus-ring focus-ring-primary" @onclick="LoadData">➤</label>
-    </div>
-    <div class="w-100 flex-grow-1 d-flex">
-        <div class="scrollable-table border rounded flex-fill">
-            <table class="table table-hover table-striped table-bordered border-primary mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width:50px" class="text-center">STT</th>
-                        <th class="text-center">Packing code</th>
-                        <th style="width:100px" class="text-center">Vị trí</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!rows.Any())
-                    {
-                        <tr><td colspan="3" class="text-center py-4">Oh noe! Không có dữ liệu</td></tr>
-                    }
-                    else
-                    {
-                        @foreach (var item in rows)
-                        {
-                            <tr>
-                                <td class="text-center">@item.STT</td>
-                                <td>
-                                    <NavLink href="@($"details?packingcode={item.PackingCode}&warehousecode={warehouseCode}&materialtype={item.MaterialType}")"
-                                             class="nav-link overflow-ellipsis" draggable="false">
-                                        @item.PackingCode
-                                    </NavLink>
-                                </td>
-                                <td class="overflow-ellipsis"> @item.Location</td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+@using Microsoft.AspNetCore.Components.Forms
+<div class="d-flex flex-column justify-content-center align-items-center vh-100">
+    <NavLink href="import" class="btn-navigate btn-import">
+        <span class="btn-icon"><img src="imgs/import.png" /></span> Nhập kho</NavLink>
+    <NavLink href="export" class="btn-navigate btn-export">
+        <span class="btn-icon"><img src="imgs/export.png" /></span> Xuất kho
+    </NavLink>
 </div>
-<script src="js/home.js"></script>
 @code {
-    [Parameter]
-    [SupplyParameterFromQuery(Name = "warehouseCode")]
-    public string? warehouseCode { get; set; }
-    private ElementReference codeInput;
 
-    class Row
-    {
-        public int STT { get; init; }
-        public string Location { get; init; } = "";
-        public string PackingCode { get; init; } = "";
-        public int MaterialType { get; set; } = 1;
-    }
-
-    private List<Row> rows = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadData();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("setFocus", codeInput);
-        }
-    }
-    private async Task OnKeyUp(KeyboardEventArgs e)
-    {
-        if (e.Code == "Enter" || e.Key == "Enter" || e.Code == "NumpadEnter") await LoadData();
-    }
-    private async Task LoadData()
-    {
-        try
-        {
-            if (warehouseCode == null) return;
-            var service = DependencyService.Get<ImportWarehouseService>();
-            await JS.InvokeVoidAsync("toggleLoading", true);
-            var data = await service.GetPackingCode(warehouseCode);
-            if (data == null) return;
-            rows.Clear();
-            for (int i = 1; i <= data.Count; i++)
-            {
-                rows.Add(new Row
-                {
-                    STT = i,
-                    Location = data[i - 1].Location,
-                    PackingCode = data[i - 1].PackingCode,
-                    MaterialType = data[i - 1].MaterialType,
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            
-        }
-        finally
-        {
-            await JS.InvokeVoidAsync("toggleLoading", false);
-        }
-    }
 }

@@ -28,3 +28,6 @@ function run_waitMe(effect) {
         onClose: function () { }
     });
 }
+function selectAllText(element) {
+    element.select();
+}
