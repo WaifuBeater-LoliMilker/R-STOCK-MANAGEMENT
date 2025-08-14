@@ -6,8 +6,9 @@
 @inject IJSRuntime JS
 
 <div class="d-flex flex-column align-items-center justify-content-center gap-3 h-100 px-3 pt-3">
+    <div class="header-area" style="height: 65px;" />
     <button class="btn btn-back" style="font-weight:bolder;font-size:22px;" @onclick="GoBack">←</button>
-    <h1 class="text-center" tabindex="-1">Xuất kho</h1>
+    <h1 class="text-center" tabindex="-1" style="z-index:999">Xuất kho</h1>
     <div class="input-group w-100">
         <input id="code" class="form-control" @ref="codeInput"
                placeholder="Nhập mã..." @bind="warehouseCode" @bind:event="oninput" @onkeyup="OnKeyUp"
@@ -103,30 +104,38 @@
     }
     private async Task LoadData()
     {
+        var service = DependencyService.Get<ExportWarehouseService>();
+        var alert = DependencyService.Get<AlertService>();
         try
         {
             if (warehouseCode == null) return;
-            var service = DependencyService.Get<ExportWarehouseService>();
             await JS.InvokeVoidAsync("toggleLoading", true);
             var data = await service.GetMaterialCode(warehouseCode);
-            if (data == null) return;
-            rows.Clear();
-            for (int i = 1; i <= data.Count; i++)
+            if (data == null)
             {
-                rows.Add(new Row
-                {
-                    STT = i,
-                    Status = data[i - 1].Status ?? 0,
-                    Quantity = data[i - 1].Quantity ?? 0,
-                    QuantityReal = data[i - 1].QuantityReal ?? 0,
-                    MaterialCode = data[i - 1].MaterialCode,
-                    MaterialType = data[i - 1].MaterialType ?? 0,
-                });
+                await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
             }
+            else
+            {
+                rows.Clear();
+                for (int i = 1; i <= data.Count; i++)
+                {
+                    rows.Add(new Row
+                    {
+                        STT = i,
+                        Status = data[i - 1].Status ?? 0,
+                        Quantity = data[i - 1].Quantity ?? 0,
+                        QuantityReal = data[i - 1].QuantityReal ?? 0,
+                        MaterialCode = data[i - 1].MaterialCode,
+                        MaterialType = data[i - 1].MaterialType ?? 0,
+                    });
+                }
+            }
+
         }
         catch (Exception ex)
         {
-
+            await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
         }
         finally
         {

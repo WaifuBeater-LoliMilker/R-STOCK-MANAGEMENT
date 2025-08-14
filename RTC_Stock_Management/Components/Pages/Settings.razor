@@ -1,0 +1,24 @@
+﻿@page "/settings"
+@using System.Linq
+@using Microsoft.AspNetCore.Components.Forms
+@using RTC_Stock_Management.Services
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<input type="text" class="form-control" placeholder="IP" @bind=ip/>
+<input type="number" class="form-control" placeholder="IP" @bind=port/>
+<button class="btn btn-primary" @onclick="OnSave">Save</button>
+@code {
+    private string ip { get; set; } = "";
+    private int port { get; set; } = 0;
+    protected override void OnInitialized()
+    {
+        var settings = DependencyService.Get<ApiSettings>();
+        (ip, port) = settings.LoadServerSettings();
+    }
+    private void OnSave()
+    {
+        var settings = DependencyService.Get<ApiSettings>();
+        settings.SaveServerSettings(ip, port);
+    }
+}

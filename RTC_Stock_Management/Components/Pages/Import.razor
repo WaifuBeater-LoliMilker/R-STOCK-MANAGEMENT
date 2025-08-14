@@ -6,13 +6,18 @@
 @inject IJSRuntime JS
 
 <div class="d-flex flex-column align-items-center justify-content-center gap-3 h-100 px-3 pt-3">
+    <div class="header-area" style="height: 65px;" />
     <button class="btn btn-back" style="font-weight:bolder;font-size:22px;" @onclick="GoBack">←</button>
-    <h1 class="text-center" tabindex="-1">Nhập kho</h1>
+    <h1 class="text-center" tabindex="-1" style="z-index:999">Nhập kho</h1>
     <div class="input-group w-100">
         <input id="code" class="form-control" @ref="codeInput"
-               placeholder="Nhập mã..." @bind="warehouseCode" @bind:event="oninput" @onkeyup="OnKeyUp"
-               aria-label="Filter rows by name" />
+               placeholder="Nhập mã..." @bind="warehouseCode" @bind:event="oninput" @onkeyup="OnKeyUp" />
         <label for="code" class="input-group-text focus-ring focus-ring-primary" @onclick="LoadData">➤</label>
+    </div>
+    <div class="input-group w-100">
+        <input id="search" class="form-control" @ref="searchInput"
+               placeholder="Tìm kiếm..." @bind="searchTerm" @bind:event="oninput" @onkeyup="OnSearch" />
+        <label for="code" class="input-group-text focus-ring focus-ring-primary">🔎</label>
     </div>
     <div class="w-100 flex-grow-1 d-flex" style="min-height:0px;">
         <div class="scrollable-table border rounded flex-fill">
@@ -25,13 +30,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (!rows.Any())
+                    @if (!filtered.Any())
                     {
                         <tr><td colspan="3" class="text-center py-4">Không có dữ liệu</td></tr>
                     }
                     else
                     {
-                        @foreach (var item in rows)
+                        @foreach (var item in filtered)
                         {
                             <tr>
                                 <td class="text-center align-middle">@item.STT</td>
@@ -56,7 +61,9 @@
     [Parameter]
     [SupplyParameterFromQuery(Name = "warehouse-code")]
     public string? warehouseCode { get; set; }
+    public string searchTerm { get; set; } = "";
     private ElementReference codeInput;
+    private ElementReference searchInput;
 
     class Row
     {
@@ -67,6 +74,7 @@
     }
 
     private List<Row> rows = new();
+    private List<Row> filtered = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,33 +93,51 @@
         if (e.Code == "Enter" || e.Key == "Enter" || e.Code == "NumpadEnter")
         {
             await LoadData();
-            await JS.InvokeVoidAsync("selectAllText", codeInput);
+            await JS.InvokeVoidAsync("setFocus", searchInput);
+        }
+    }
+    private async Task OnSearch(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" || e.Key == "Enter" || e.Code == "NumpadEnter")
+        {
+            filtered = string.IsNullOrWhiteSpace(searchTerm)
+            ? rows
+            : rows.Where(r => r.PackingCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
     private async Task LoadData()
     {
+        var service = DependencyService.Get<ImportWarehouseService>();
+        var alert = DependencyService.Get<AlertService>();
         try
         {
             if (warehouseCode == null) return;
-            var service = DependencyService.Get<ImportWarehouseService>();
             await JS.InvokeVoidAsync("toggleLoading", true);
             var data = await service.GetPackingCode(warehouseCode);
-            if (data == null) return;
-            rows.Clear();
-            for (int i = 1; i <= data.Count; i++)
+            if (data == null)
             {
-                rows.Add(new Row
-                {
-                    STT = i,
-                    Location = data[i - 1].Location,
-                    PackingCode = data[i - 1].PackingCode,
-                    MaterialType = data[i - 1].MaterialType,
-                });
+                await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
             }
+            else
+            {
+                rows.Clear();
+                for (int i = 1; i <= data.Count; i++)
+                {
+                    rows.Add(new Row
+                    {
+                        STT = i,
+                        Location = data[i - 1].Location,
+                        PackingCode = data[i - 1].PackingCode,
+                        MaterialType = data[i - 1].MaterialType,
+                    });
+                }
+                filtered = rows;
+            }
+
         }
         catch (Exception ex)
         {
-
+            await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
         }
         finally
         {

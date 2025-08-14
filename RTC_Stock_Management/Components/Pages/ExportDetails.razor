@@ -7,8 +7,9 @@
 
 
 <div class="d-flex flex-column align-items-center justify-content-center gap-3 h-100 px-3 pt-3">
+    <div class="header-area" style="height: 65px;" />
     <button class="btn btn-back" style="font-weight:bolder;font-size:22px;" @onclick="GoBack">←</button>
-    <h1 class="text-center" tabindex="-1">@materialcode</h1>
+    <h1 class="text-center" tabindex="-1" style="z-index:999">@materialcode</h1>
     <div class="w-100 row">
         <div class="col-6">
             <label for="planquantity" class="form-label">SL cần xuất</label>
@@ -148,7 +149,7 @@
         {
             var service = DependencyService.Get<ExportWarehouseService>();
             var alert = DependencyService.Get<AlertService>();
-            if(!rows.Any(r => r.Serial == serialNumber))
+            if (!rows.Any(r => r.Serial == serialNumber))
             {
                 await alert.ShowAsync("Thông báo", "Serial không nằm trong danh sách", "OK");
                 return;
@@ -160,28 +161,36 @@
     }
     private async Task LoadData()
     {
+        var service = DependencyService.Get<ExportWarehouseService>();
+        var alert = DependencyService.Get<AlertService>();
         try
         {
             if (materialcode == null) return;
-            var service = DependencyService.Get<ExportWarehouseService>();
             await JS.InvokeVoidAsync("toggleLoading", true);
             var data = await service.GetSerials(materialcode);
-            if (data == null) return;
-            rows.Clear();
-            for (int i = 1; i <= data.Count; i++)
+            if (data == null)
             {
-                rows.Add(new Row
-                {
-                    STT = i,
-                    PackingCode = data[i - 1].PackingCode,
-                    Serial = data[i - 1].SerialNumber,
-                    Location = data[i - 1].Location,
-                });
+                await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
             }
+            else
+            {
+                rows.Clear();
+                for (int i = 1; i <= data.Count; i++)
+                {
+                    rows.Add(new Row
+                    {
+                        STT = i,
+                        PackingCode = data[i - 1].PackingCode,
+                        Serial = data[i - 1].SerialNumber,
+                        Location = data[i - 1].Location,
+                    });
+                }
+            }
+
         }
         catch (Exception ex)
         {
-
+            await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
         }
         finally
         {

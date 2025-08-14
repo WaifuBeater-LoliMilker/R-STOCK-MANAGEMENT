@@ -7,8 +7,9 @@
 @implements IDisposable
 
 <div class="d-flex flex-column align-items-center justify-content-center gap-3 h-100 px-3 pt-3">
+    <div class="header-area" style="height: 54px;" />
     <button class="btn btn-back" style="font-weight:bolder;font-size:22px;" @onclick="GoBack">←</button>
-    <h1 class="text-center" tabindex="-1" style="font-size:20px;">@packingcode</h1>
+    <h1 class="text-center" tabindex="-1" style="font-size:20px;z-index:999">@packingcode</h1>
     <div class="input-group w-100">
         <input id="location" class="form-control" @ref="locationInput"
                placeholder="Nhập vị trí..." @bind="location" @bind:event="oninput" @onkeyup="OnKeyUp"
@@ -127,28 +128,36 @@
     }
     private async Task LoadData()
     {
+        var service = DependencyService.Get<ImportWarehouseService>();
+        var alert = DependencyService.Get<AlertService>();
         try
         {
             if (packingcode == null) return;
-            var service = DependencyService.Get<ImportWarehouseService>();
             await JS.InvokeVoidAsync("toggleLoading", true);
             var data = await service.GetSerials(packingcode);
-            if (data == null) return;
-            rows.Clear();
-            for (int i = 1; i <= data.Count; i++)
+            if (data == null)
             {
-                rows.Add(new Row
-                {
-                    IsChecked = true,
-                    STT = i,
-                    Location = data[i - 1].Location,
-                    Serial = data[i - 1].SerialNumber,
-                });
+                await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
             }
+            else
+            {
+                rows.Clear();
+                for (int i = 1; i <= data.Count; i++)
+                {
+                    rows.Add(new Row
+                    {
+                        IsChecked = true,
+                        STT = i,
+                        Location = data[i - 1].Location,
+                        Serial = data[i - 1].SerialNumber,
+                    });
+                }
+            }
+
         }
         catch (Exception ex)
         {
-
+            await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
         }
         finally
         {
@@ -171,6 +180,7 @@
         }
         var serialItems = rows.Select(r => new ImportSerialItem { SerialNumber = r.Serial, Location = r.Location }).ToList();
         var result = await service.UpdateSerials(packingcode ?? "", serialItems, materialtype, location ?? "");
-        if (!result) await alert.ShowAsync("Thông báo", "Cập nhật không thành công", "OK");
+        if (result) await alert.ShowAsync("Thông báo", "Cập nhật thành công", "OK");
+        else await alert.ShowAsync("Thông báo", "Cập nhật thất bại", "OK");
     }
 }

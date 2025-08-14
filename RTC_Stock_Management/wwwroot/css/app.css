@@ -72,6 +72,13 @@
     height: 100%;
 }
 
+.header-area {
+    position: absolute;
+    background-color: lightblue;
+    top:0;
+    width: 100%;
+}
+
 .input-group-text {
     user-select: none;
     cursor: pointer;
@@ -103,25 +110,30 @@ a.nav-link {
 tbody td {
     user-select: text;
 }
+
 .table {
     table-layout: fixed;
     width: 100%;
 }
+
 .overflow-ellipsis {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .overflow-breakword {
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: break-word;
 }
+
 .btn-back {
     position: absolute;
     top: 0;
     left: 0;
 }
+
 .btn-navigate {
     display: flex;
     align-items: center;
@@ -144,6 +156,7 @@ tbody td {
         box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         text-decoration: none;
     }
+
 .btn-icon {
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
@@ -159,9 +172,11 @@ tbody td {
         width: 28px;
         height: 28px;
     }
-.btn-import{
+
+.btn-import {
     background-color: limegreen;
 }
-.btn-export{
+
+.btn-export {
     background-color: orange;
 }

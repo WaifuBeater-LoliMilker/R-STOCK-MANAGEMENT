@@ -1,11 +1,13 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Forms
 <div class="d-flex flex-column justify-content-center align-items-center vh-100">
+    <img src="imgs/rtc_icon.png" style="width: 70%;margin-bottom: 2.5rem;"/>
     <NavLink href="import" class="btn-navigate btn-import">
         <span class="btn-icon"><img src="imgs/import.png" /></span> Nhập kho</NavLink>
     <NavLink href="export" class="btn-navigate btn-export">
         <span class="btn-icon"><img src="imgs/export.png" /></span> Xuất kho
     </NavLink>
+    <NavLink href="settings" class="btn" style="position:absolute;top:0;right:0"><img src="imgs/settings.png"/></NavLink>
 </div>
 @code {
 
