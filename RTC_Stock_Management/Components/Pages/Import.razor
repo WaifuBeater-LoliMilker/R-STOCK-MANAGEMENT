@@ -56,7 +56,6 @@
     </div>
     <div style="height:8px"></div>
 </div>
-<script src="js/home.js"></script>
 @code {
     [Parameter]
     [SupplyParameterFromQuery(Name = "warehouse-code")]
@@ -103,6 +102,8 @@
             filtered = string.IsNullOrWhiteSpace(searchTerm)
             ? rows
             : rows.Where(r => r.PackingCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            await JS.InvokeVoidAsync("setFocus", searchInput);
+            await JS.InvokeVoidAsync("selectAllText", searchInput);
         }
     }
     private async Task LoadData()
@@ -116,7 +117,7 @@
             var data = await service.GetPackingCode(warehouseCode);
             if (data == null)
             {
-                await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
+                await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Load dữ liệu thất bại");
             }
             else
             {
@@ -137,7 +138,7 @@
         }
         catch (Exception ex)
         {
-            await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
+            await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Load dữ liệu thất bại");
         }
         finally
         {

@@ -137,7 +137,7 @@
             var data = await service.GetSerials(packingcode);
             if (data == null)
             {
-                await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
+                await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Load dữ liệu thất bại");
             }
             else
             {
@@ -157,7 +157,7 @@
         }
         catch (Exception ex)
         {
-            await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
+            await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Load dữ liệu thất bại");
         }
         finally
         {
@@ -180,7 +180,7 @@
         }
         var serialItems = rows.Select(r => new ImportSerialItem { SerialNumber = r.Serial, Location = r.Location }).ToList();
         var result = await service.UpdateSerials(packingcode ?? "", serialItems, materialtype, location ?? "");
-        if (result) await alert.ShowAsync("Thông báo", "Cập nhật thành công", "OK");
-        else await alert.ShowAsync("Thông báo", "Cập nhật thất bại", "OK");
+        if (result) await JS.InvokeVoidAsync("showToast", "success", "Thông báo", "Cập nhật thành công");
+        else await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Cập nhật  thất bại");
     }
 }

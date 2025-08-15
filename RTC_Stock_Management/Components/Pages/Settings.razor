@@ -19,6 +19,8 @@
     private void OnSave()
     {
         var settings = DependencyService.Get<ApiSettings>();
+        var apiService = DependencyService.Get<ApiService>();
         settings.SaveServerSettings(ip, port);
+        apiService.SetBaseUrl(ip, port);
     }
 }

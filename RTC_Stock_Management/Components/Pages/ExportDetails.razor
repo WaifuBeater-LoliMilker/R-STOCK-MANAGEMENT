@@ -139,8 +139,8 @@
             var service = DependencyService.Get<ExportWarehouseService>();
             var alert = DependencyService.Get<AlertService>();
             var result = await service.UpdateSmallType(materialcode ?? "", actualQuantity);
-            if (!result) await alert.ShowAsync("Thông báo", "Cập nhật thất bại", "OK");
-            else await alert.ShowAsync("Thông báo", "Cập nhật thành công", "OK");
+            if (!result) await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Cập nhật thất bại");
+            else await JS.InvokeVoidAsync("showToast", "success", "Thông báo", "Cập nhật thành công");
         }
     }
     private async Task OnSerialKeyUp(KeyboardEventArgs e)
@@ -151,12 +151,16 @@
             var alert = DependencyService.Get<AlertService>();
             if (!rows.Any(r => r.Serial == serialNumber))
             {
-                await alert.ShowAsync("Thông báo", "Serial không nằm trong danh sách", "OK");
+                await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Serial không nằm trong danh sách");
                 return;
             }
             var result = await service.UpdateLargeType(materialcode ?? "", serialNumber);
-            if (result == 0) await alert.ShowAsync("Thông báo", "Cập nhật không thành công", "OK");
-            else actualQuantity = result;
+            if (result == 0) await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Cập nhật thất bại");
+            else
+            {
+                actualQuantity = result;
+                await JS.InvokeVoidAsync("showToast", "success", "Thông báo", "Cập nhật thành công");
+            }
         }
     }
     private async Task LoadData()
@@ -170,7 +174,7 @@
             var data = await service.GetSerials(materialcode);
             if (data == null)
             {
-                await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
+                await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Load dữ liệu thất bại");
             }
             else
             {
@@ -190,7 +194,7 @@
         }
         catch (Exception ex)
         {
-            await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
+            await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Load dữ liệu thất bại");
         }
         finally
         {

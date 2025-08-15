@@ -31,3 +31,22 @@ function run_waitMe(effect) {
 function selectAllText(element) {
     element.select();
 }
+function showToast(status, title, text, speed = 200, autotimeout = 1500) {
+    new Notify({
+        status: status,
+        title: title,
+        text: text,
+        effect: 'fade',
+        speed: speed,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: autotimeout,
+        gap: 20,
+        distance: 20,
+        type: 'outline',
+        position: 'right top'
+    })
+}

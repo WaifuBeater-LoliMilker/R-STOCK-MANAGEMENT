@@ -113,7 +113,7 @@
             var data = await service.GetMaterialCode(warehouseCode);
             if (data == null)
             {
-                await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
+                await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Load dữ liệu thất bại");
             }
             else
             {
@@ -135,7 +135,7 @@
         }
         catch (Exception ex)
         {
-            await alert.ShowAsync("Thông báo", "Load dữ liệu thất bại", "OK");
+            await JS.InvokeVoidAsync("showToast", "error", "Thông báo", "Load dữ liệu thất bại");
         }
         finally
         {
